@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    container_name: mis_web
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py create_testdata &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DJANGO_SECRET_KEY=supersecretkey
+      - POSTGRES_DB=mis_db
+      - POSTGRES_USER=mis_user
+      - POSTGRES_PASSWORD=mis_pass
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: mis_db
+    restart: always
+    environment:
+      POSTGRES_DB: mis_db
+      POSTGRES_USER: mis_user
+      POSTGRES_PASSWORD: mis_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
